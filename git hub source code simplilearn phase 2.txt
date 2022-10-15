@@ -1,0 +1,279 @@
+AdminLogin.java
+package com.servlets;
+
+import java.io.IOException;
+import java.sql.SQLException;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import com.database.Dao;
+
+@WebServlet("/AdminLogin")
+public class AdminLogin extends HttpServlet {
+    private static final long serialVersionUID = 1L;
+    
+protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        
+        String email=request.getParameter("email");
+        String password=request.getParameter("password");
+        
+        try {
+            Dao dao=new Dao();
+            
+            if(dao.checkAdmin(email,password)) {
+                response.sendRedirect("AdminHome.jsp");
+            }
+            else {
+                HttpSession session=request.getSession();
+                session.setAttribute("message", "Invalid Details");
+                response.sendRedirect("AdminPage.jsp");
+            }
+        } catch (ClassNotFoundException | SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+}
+ 
+UserLogin.java
+package com.servlets;
+
+import javax.servlet.annotation.WebServlet;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.HashMap;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import com.database.Dao;
+
+@WebServlet("/UserLogin")
+public class UserLogin extends HttpServlet {
+    private static final long serialVersionUID = 1L;
+protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        
+        String email=request.getParameter("email");
+        String password=request.getParameter("password");
+        
+        try {
+            Dao dao=new Dao();
+            HashMap<String,String> user=dao.checkUser(email,password);
+            HttpSession session=request.getSession();
+            if(user!=null) {
+                session.setAttribute("user", user);
+                response.sendRedirect("HomePage.jsp");
+            }
+            else {
+                session.setAttribute("message", "Invalid Details");
+                response.sendRedirect("UserPage.jsp");
+            }
+        } catch (ClassNotFoundException | SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+}
+ 
+UserRegistration.java
+package com.servlets;
+
+import javax.servlet.annotation.WebServlet;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.HashMap;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import com.database.Dao;
+
+@WebServlet("/UserRegistration")
+public class UserRegistration extends HttpServlet {
+    private static final long serialVersionUID = 1L;
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String email=request.getParameter("email");
+        String password=request.getParameter("password");
+        String name=request.getParameter("name");
+        String phno=request.getParameter("phno");
+        String adno=request.getParameter("adno");
+        
+        HashMap<String,String> user=new HashMap<>();
+        user.put("email", email);
+        user.put("password", password);
+        user.put("name", name);
+        user.put("phno", phno);
+        user.put("adno", adno);
+        
+        try {
+            Dao dao=new Dao();
+            boolean result=dao.insertUser(user);
+            HttpSession session=request.getSession();
+            if(result) {
+                session.setAttribute("message", "User Added Successfully");
+            }
+            else {
+                session.setAttribute("message","Invalid Details");
+            }
+        } catch (ClassNotFoundException | SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        response.sendRedirect("UserPage.jsp");
+    }
+}
+ 
+InsertFlight.java
+package com.servlets;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.HashMap;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import com.database.Dao;
+
+@WebServlet("/InsertFlight")
+public class InsertFlight extends HttpServlet {
+    private static final long serialVersionUID = 1L;
+protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        
+        String name=request.getParameter("name");
+        String from=request.getParameter("from");
+        String to=request.getParameter("to");
+        String departure=request.getParameter("departure");
+        String time=request.getParameter("time");
+        String price=request.getParameter("price");
+        HashMap<String,String> flight=new HashMap<>();
+        flight.put("name", name);
+        flight.put("from", from);
+        flight.put("to", to);
+        flight.put("date", departure);
+        flight.put("time", time);
+        flight.put("price", price);
+        try {
+            Dao dao=new Dao();
+            HttpSession session=request.getSession();
+            if(dao.insertFlight(flight)) {    
+                session.setAttribute("message", "Flight Added Successfully");
+            }
+            else {
+                session.setAttribute("message", "Invalid Details");
+            }
+        } catch (ClassNotFoundException | SQLException e) {
+            // TODO Auto-generated catch block
+            System.out.print("error");
+            e.printStackTrace();
+        }
+        response.sendRedirect("AdminHome.jsp");
+    }
+}
+ 
+ForgotPassword.java
+package com.servlets;
+
+import javax.servlet.annotation.WebServlet;
+import java.io.IOException;
+import java.sql.SQLException;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import com.database.Dao;
+@WebServlet("/ForgotPassword")
+public class ForgotPassword extends HttpServlet {
+    private static final long serialVersionUID = 1L;
+protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        
+        String email=request.getParameter("email");
+        String password=request.getParameter("password");
+        
+        try {
+            Dao dao=new Dao();
+            HttpSession session=request.getSession();
+            if(dao.changeAdminPassword(email,password)) {
+                session.setAttribute("message", "Password Changed Successfully");
+            }
+            else {
+                session.setAttribute("message", "Invalid Details");
+            }
+        } catch (ClassNotFoundException | SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        response.sendRedirect("AdminPage.jsp"); 
+    }
+}
+
+ 
+Logout.java
+package com.servlets;
+
+import javax.servlet.annotation.WebServlet;
+import java.io.IOException;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+@WebServlet("/Logout")
+public class Logout extends HttpServlet {
+    private static final long serialVersionUID = 1L;
+protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        
+        HttpSession session=request.getSession();
+        session.setAttribute("user", null);
+        response.sendRedirect("HomePage.jsp");
+    }
+}
+
+ 
+FlightList.java
+package com.servlets;
+
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.List;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import com.database.Dao;
+
+@WebServlet("/FlightList")
+public class FlightList extends HttpServlet {
+    private static final long serialVersionUID = 1L;
+    
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        
+        String from=request.getParameter("from");
+        String to=request.getParameter("to");
+        String departure=request.getParameter("departure");
+        
+        try {
+            Dao dao = new Dao();
+            List<String[]> flights=dao.getAvailableFlights(from, to, departure);            
+            HttpSession session=request.getSession();
+            session.setAttribute("flights", flights);
+            
+        } catch (ClassNotFoundException | SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        response.sendRedirect("FlightList.jsp");
+    }
+}
+ 
+
